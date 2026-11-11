@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="873" height="286" viewBox="0 0 873 286" role="img" aria-label="LiamTech Enterprise Limited — Innovating Your Future">
+  <title>LiamTech Enterprise Limited — Innovating Your Future</title>
+  <!-- mark -->
+  <rect x="6" y="30" width="226" height="226" rx="38" fill="#e0191b"/>
+  <path d="M62 82h30v100h48v26H62z" fill="#fff"/>
+  <path d="M124 82h76v26h-23v100h-30V108h-23z" fill="#fff"/>
+  <!-- wordmark -->
+  <text x="262" y="142" font-family="Arial Black, Arial, Helvetica, sans-serif" font-weight="900" font-size="122"
+        textLength="604" lengthAdjust="spacingAndGlyphs"><tspan fill="#222">Liam</tspan><tspan fill="#e0191b">Tech</tspan></text>
+  <text x="266" y="196" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="40" fill="#222"
+        textLength="598" lengthAdjust="spacingAndGlyphs">ENTERPRISE LIMITED</text>
+  <!-- tagline -->
+  <text x="266" y="252" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-weight="700" font-size="40" fill="#e0191b"
+        textLength="470" lengthAdjust="spacingAndGlyphs">Innovating Your Future</text>
+</svg>

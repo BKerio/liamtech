@@ -1,0 +1,268 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ───────────────────────────── Catalogue ─────────────────────────────
+
+model Category {
+  id       Int        @id @default(autoincrement())
+  /// Full slug path, e.g. "body-parts/bumper/front-bumper"
+  path     String     @unique
+  name     String
+  position Int        @default(0)
+  parentId Int?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryTree")
+  products Product[]
+
+  @@index([parentId])
+}
+
+model Manufacturer {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  logo     String?
+  featured Boolean   @default(false)
+  position Int       @default(0)
+  products Product[]
+}
+
+model Make {
+  id     Int     @id
+  name   String
+  models Model[]
+}
+
+model Model {
+  id       Int              @id
+  name     String
+  makeId   Int
+  make     Make             @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  vehicles ProductVehicle[]
+
+  @@index([makeId])
+}
+
+model Product {
+  id             Int               @id @default(autoincrement())
+  slug           String            @unique
+  name           String
+  sku            String
+  price          Int
+  oldPrice       Int?
+  inStock        Boolean           @default(true)
+  stockQty       Int               @default(10)
+  popularity     Int               @default(0)
+  cardImage      String?
+  images         String[]
+  thumbs         String[]
+  /// Free-text "Applicable vehicles" lines as shown on the product page
+  vehicleText    String[]
+  categoryId     Int?
+  category       Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  manufacturerId Int?
+  manufacturer   Manufacturer?     @relation(fields: [manufacturerId], references: [id], onDelete: SetNull)
+  vehicles       ProductVehicle[]
+  homeSections   HomeSectionItem[]
+  reviews        Review[]
+  basketLines    BasketLine[]
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([categoryId])
+  @@index([manufacturerId])
+}
+
+model ProductVehicle {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  modelId   Int
+  model     Model   @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  yearFrom  Int?
+  yearTo    Int?
+
+  @@index([productId])
+  @@index([modelId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name      String
+  email     String
+  title     String
+  score     Int
+  body      String
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+// ───────────────────────────── CMS ─────────────────────────────
+
+model HomeSection {
+  id       Int               @id @default(autoincrement())
+  title    String
+  position Int               @default(0)
+  items    HomeSectionItem[]
+}
+
+model HomeSectionItem {
+  id        Int         @id @default(autoincrement())
+  sectionId Int
+  section   HomeSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  position  Int         @default(0)
+
+  @@index([sectionId])
+}
+
+/// placement: top | hero | mid | featured_link | sidebar
+model Banner {
+  id          Int     @id @default(autoincrement())
+  placement   String
+  image       String
+  mobileImage String?
+  href        String?
+  alt         String  @default("")
+  caption     String?
+  position    Int     @default(0)
+  active      Boolean @default(true)
+
+  @@index([placement])
+}
+
+model Page {
+  slug      String   @id
+  title     String
+  body      String
+  updatedAt DateTime @updatedAt
+}
+
+model Store {
+  id       Int      @id @default(autoincrement())
+  slug     String   @unique
+  name     String
+  region   String
+  address  String[]
+  phones   String[]
+  email    String?
+  /// [{ day: "Monday", time: "08:00 - 17:00" }, ...]
+  hours    Json
+  lat      Float?
+  lng      Float?
+  image    String?
+  position Int      @default(0)
+  orders   Order[]
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+// ───────────────────────────── Customers ─────────────────────────────
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  firstName        String?
+  lastName         String?
+  phone            String?
+  hashedPassword   String
+  marketingConsent Boolean   @default(false)
+  sessions         Session[]
+  baskets          Basket[]
+  orders           Order[]
+  reviews          Review[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Basket {
+  id        String       @id @default(cuid())
+  userId    String?
+  user      User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  /// open | submitted
+  status    String       @default("open")
+  lines     BasketLine[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+model BasketLine {
+  id        Int     @id @default(autoincrement())
+  basketId  String
+  basket    Basket  @relation(fields: [basketId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+
+  @@unique([basketId, productId])
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  number        String      @unique
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  /// pickup | delivery
+  method        String
+  storeId       Int?
+  store         Store?      @relation(fields: [storeId], references: [id], onDelete: SetNull)
+  address       String?
+  city          String?
+  notes         String?
+  /// pending | processing | completed | cancelled
+  status        String      @default("pending")
+  total         Int
+  lines         OrderLine[]
+  createdAt     DateTime    @default(now())
+
+  @@index([userId])
+}
+
+model OrderLine {
+  id          Int    @id @default(autoincrement())
+  orderId     Int
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int?
+  productSlug String
+  title       String
+  sku         String
+  image       String?
+  unitPrice   Int
+  quantity    Int
+}

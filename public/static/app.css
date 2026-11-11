@@ -1,0 +1,65 @@
+/*
+ * Small additions for React re-implementations of the original jQuery widgets
+ * (slick carousel, select2, collapse). Everything else comes from main.css.
+ */
+
+/* slick track — flex instead of slick's inline pixel widths */
+.amx-slick-track {
+  display: flex !important;
+  flex-wrap: nowrap;
+  width: 100%;
+  transition: transform 0.5s ease;
+}
+.amx-slick-track::before,
+.amx-slick-track::after {
+  display: none !important;
+}
+.amx-slick-track > .slick-slide {
+  float: none;
+  height: auto;
+}
+.amx-slick-track > .featured-links__item {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+@media (min-width: 992px) {
+  .amx-slick-track > .featured-links__item {
+    flex: 0 0 25%;
+    max-width: 25%;
+  }
+}
+
+/* select2 replacement */
+.amx-select2 {
+  position: relative;
+  width: 100%;
+}
+.amx-select2 .select2-dropdown {
+  top: 100%;
+  left: 0;
+}
+.amx-select2.select2-container--disabled .select2-selection--single {
+  background-color: #eee;
+  cursor: default;
+}
+
+/* original serves 100px-wide manufacturer thumbnails on product + listing pages */
+.product-title > img,
+.product-wide-card .col-lg-2 img {
+  max-width: 100px !important;
+}
+
+/* store map iframe */
+.stores-map iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* inline form errors */
+.amx-errorlist {
+  color: #dc3545;
+  list-style: none;
+  padding-left: 0;
+  font-size: 90%;
+}
