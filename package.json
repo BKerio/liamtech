@@ -12,7 +12,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "media:upload": "tsx --env-file=.env scripts/upload-media.ts",
-    "db:sync-pages": "tsx --env-file=.env scripts/sync-pages.ts"
+    "db:sync-pages": "tsx --env-file=.env scripts/sync-pages.ts",
+    "admin:create": "tsx --env-file=.env scripts/create-admin.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -7,6 +7,7 @@ import { ProfileForm } from "@/components/forms/AccountForms";
 import { getCurrentUser } from "@/lib/auth";
 import { logout } from "@/app/actions/account";
 import { kes } from "@/lib/format";
+import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = { title: "Your account" };
 
@@ -38,7 +39,12 @@ export default async function AccountPage() {
                   </p>
                   <ProfileForm user={user} />
                 </div>
-                <div className="card-footer">
+                <div className="card-footer d-flex">
+                  {isAdminEmail(user.email) && (
+                    <Link href="/admin/" className="btn btn-primary btn-sm mr-2">
+                      Admin panel
+                    </Link>
+                  )}
                   <form action={logout}>
                     <button type="submit" className="btn btn-outline-dark btn-sm">
                       Logout

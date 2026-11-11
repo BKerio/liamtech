@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import { Suspense } from "react";
 import Toasts from "@/components/Toasts";
 import ScrollToTop from "@/components/ScrollToTop";
+import ShopChrome from "@/components/layout/ShopChrome";
 import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -34,11 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link type="text/css" href="/static/app.css" rel="stylesheet" />
       </head>
       <body id="default">
-        <div className="page">
-          <Header />
-          <main className="page-main">{children}</main>
-          <Footer />
-        </div>
+        <ShopChrome header={<Header />} footer={<Footer />}>
+          {children}
+        </ShopChrome>
         <Toasts />
         <Suspense>
           <ScrollToTop />

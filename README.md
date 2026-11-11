@@ -49,10 +49,43 @@ are kept (stores are upserted).
 | Product detail, gallery, share, reviews | `/catalogue/[slug]/`, `/catalogue/[slug]/reviews/add/` |
 | Basket (anonymous + per-user, merged on login) | `/basket/` |
 | Checkout (click & collect or delivery) → order | `/checkout/`, `/checkout/thank-you/` |
-| Accounts: login, register, profile, order history | `/accounts/login/`, `/accounts/register/`, `/accounts/`, `/accounts/orders/[number]/` |
+| Accounts: login, profile, order history (no self-registration) | `/accounts/login/`, `/accounts/`, `/accounts/orders/[number]/` |
 | Stores (map, opening times), contact form | `/stores/`, `/contact/` |
 | CMS pages from the DB | `/about/`, `/terms-and-conditions/`, `/privacy-policy/`, `/delivery-pickup/` |
 | Vehicle make → model → year lookups | `/api/vehicles/models/`, `/api/vehicles/years/` |
+
+## Admin panel (`/admin/`)
+
+Self-registration is disabled. Admin accounts are created from the command line:
+
+```bash
+npm run admin:create -- admin@liamtech.co.ke '<password>'   # creates the account, or resets its password
+```
+
+1. Add the email to `ADMIN_EMAILS` in `.env` (comma-separated for several admins) and restart the server.
+   In production, set the same variable in your host's environment settings.
+2. Sign in at **`/accounts/login/?next=/admin/`**. Visiting `/admin/` while signed out redirects there too.
+
+`npm run db:seed` also creates or updates the admin from `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` in `.env`.
+
+| Section | What you can do |
+| --- | --- |
+| Dashboard | Pending/processing orders, 30-day revenue and orders, stock and message counts, recent orders |
+| Orders | Search/filter, view, change status (pending → processing → completed / cancelled), call/WhatsApp/email the customer |
+| Products | Search/filter, create, edit price / "was" price (sale ribbon), stock, category, brand, vehicles; upload images |
+| Categories | Add, rename, re-parent, reorder, delete (blocked while it still has products or sub-categories) |
+| Brands | Add, edit, upload logos, choose which appear in the home "Our product brands" strip |
+| Banners | Upload images for the top strip, hero, mid carousel, "More products" tiles and sidebar; links, order, hide/show |
+| Home sections | Create the home carousels and add, reorder or remove their products (by SKU or slug) |
+| Pages | Edit About / Terms / Privacy / Delivery (HTML), or create new pages at `/<slug>/` |
+| Stores | Branches: address, phones, email, opening times, map location, photo |
+| Messages / Reviews | Read and delete contact-form messages; hide, publish or delete product reviews |
+| Customers | Registered accounts and their order counts |
+
+Security: every admin page and every admin server action calls `requireAdmin()` (`src/lib/admin.ts`).
+Signed-out visitors are sent to log in, and signed-in non-admins get a 404. Uploads accept only PNG, JPEG,
+WebP or GIF images up to 5 MB, checked by their file signature, and are stored in the `assets` bucket under
+`media/uploads/`.
 
 ## Data model
 

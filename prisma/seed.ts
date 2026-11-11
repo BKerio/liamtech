@@ -6,6 +6,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { PrismaClient } from "@prisma/client";
 import { prismaDatabaseUrl } from "../src/lib/db-url";
+import { upsertAdmin } from "../scripts/create-admin";
 
 const prisma = new PrismaClient({ datasourceUrl: prismaDatabaseUrl() });
 
@@ -203,6 +204,12 @@ async function main() {
 
   // ── CMS pages
   await prisma.page.createMany({ data: data.pages });
+
+  // ── admin account (credentials come from .env, never from the repo)
+  if (process.env.SEED_ADMIN_EMAIL && process.env.SEED_ADMIN_PASSWORD) {
+    const admin = await upsertAdmin(prisma, process.env.SEED_ADMIN_EMAIL, process.env.SEED_ADMIN_PASSWORD);
+    console.log(`Admin account: ${admin.email}`);
+  }
 
   console.log("Seed complete.");
 }

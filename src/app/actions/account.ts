@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
-import { createSession, destroySession, getCurrentUser, hashPassword, verifyPassword } from "@/lib/auth";
+import { createSession, destroySession, getCurrentUser, verifyPassword } from "@/lib/auth";
 import { mergeAnonymousBasket } from "@/lib/basket";
 import { echo, type FormState } from "@/lib/forms";
 
@@ -27,43 +27,6 @@ export async function login(_: FormState, form: FormData): Promise<FormState> {
   if (!user || !(await verifyPassword(parsed.data.password, user.hashedPassword))) {
     return { values: echo(form), message: "Please enter a correct username and password. Note that both fields may be case-sensitive." };
   }
-  await mergeAnonymousBasket(user.id);
-  await createSession(user.id);
-  redirect(safeNext(form.get("next")));
-}
-
-const registerSchema = z.object({
-  firstName: z.string().trim().max(255).optional(),
-  lastName: z.string().trim().max(255).optional(),
-  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
-  password: z
-    .string()
-    .min(9, "This password is too short. It must contain at least 9 characters.")
-    .refine((p) => !/^\d+$/.test(p), "This password is entirely numeric."),
-  consent: z.boolean(),
-});
-
-export async function register(_: FormState, form: FormData): Promise<FormState> {
-  const parsed = registerSchema.safeParse({
-    firstName: form.get("first_name") || undefined,
-    lastName: form.get("last_name") || undefined,
-    email: form.get("email"),
-    password: form.get("password1"),
-    consent: form.get("personal_data_consent") === "on",
-  });
-  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors, values: echo(form) };
-  const exists = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-  if (exists) return { errors: { email: ["A user with this email address already exists"] }, values: echo(form) };
-
-  const user = await prisma.user.create({
-    data: {
-      email: parsed.data.email,
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      hashedPassword: await hashPassword(parsed.data.password),
-      marketingConsent: parsed.data.consent,
-    },
-  });
   await mergeAnonymousBasket(user.id);
   await createSession(user.id);
   redirect(safeNext(form.get("next")));
