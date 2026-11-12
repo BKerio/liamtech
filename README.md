@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Then open http://localhost:3000 or view online on https://liamtech.vercela.pp in your browser.
+Then open http://localhost:3000 or view online on https://liamtech.vercel.app in your browser.
 
 ## Technology
 
